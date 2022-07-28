@@ -18,15 +18,16 @@ import {
 } from 'react-native';
 import { Colors } from 'react-native/Libraries/NewAppScreen';
 
-import { geoToH3, h3ToGeo, h3ToGeoBoundary } from "h3-reactnative";
+import { geoToH3, h3ToGeo, h3ToGeoBoundary, h3ToParent } from "h3-reactnative";
 import Geolocation from 'react-native-geolocation-service';
 import MapView, { enableLatestRenderer, Marker, Polygon } from 'react-native-maps';
 
 import { deltaFromBoundary } from './h3Utils';
+import Tile from './components/Tile';
 
 enableLatestRenderer();
 
-const MAX_RESOLUTION = 7;
+const MAX_RESOLUTION = 6;
 
 function App() {
   const [region, setRegion] = useState({});
@@ -36,7 +37,6 @@ function App() {
   const [position, setPosition] = useState([0, 0]);
   const [centroid, setCentroid] = useState([0, 0]);
   const [tile, setTile] = useState('');
-  const [tileBoundary, setTileBoundary] = useState([]);
 
   const isDarkMode = useColorScheme() === 'dark';
 
@@ -55,19 +55,18 @@ function App() {
           const [h3lat, h3lng] = h3ToGeo(h3);
           setCentroid([h3lat, h3lng]);
           const boundary = h3ToGeoBoundary(h3)
-          setTileBoundary(boundary);
 
           const [latDelta, lngDelta] = deltaFromBoundary(boundary)
           setRegion({
             latitude: h3lat,
             longitude: h3lng,
-            latitudeDelta: latDelta * 1.2,
-            longitudeDelta: lngDelta * 1.2,
+            latitudeDelta: latDelta * 1.5,
+            longitudeDelta: lngDelta * 1.5,
           });
           setGettingPosition(false);
         },
         console.error,
-        { enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 }
+        { enableHighAccuracy: false, timeout: 15000, maximumAge: 10000 }
       );
     }
   }, [locationAuthIos]);
@@ -113,11 +112,21 @@ function App() {
             coordinate={{ latitude: centroid[0], longitude: centroid[1] }}
             pinColor="blue"
           />
-          <Polygon 
-            coordinates={tileBoundary.map(coords => {
-              return { latitude: coords[0], longitude: coords[1] };
-            })}
-            fillColor="rgba(256,0,0,0.5)"
+          <Tile 
+            h3={tile}
+            fillColor="rgba(0,0,0,0.15)"
+          />
+          <Tile
+            h3={h3ToParent(tile, MAX_RESOLUTION - 1)}
+            fillColor="rgba(0,0,255,0.15)"
+          />
+          <Tile
+            h3={h3ToParent(tile, MAX_RESOLUTION - 2)}
+            fillColor="rgba(0,255,0,0.15)"
+          />
+          <Tile
+            h3={h3ToParent(tile, MAX_RESOLUTION - 3)}
+            fillColor="rgba(255,255,0,0.15)"
           />
         </MapView>
       </SafeAreaView>
