@@ -1,4 +1,4 @@
-import { h3ToGeoBoundary } from "h3-reactnative";
+import { h3ToGeoBoundary, h3ToGeo } from "h3-reactnative";
 
 export function deltaFromH3(h3) {
   const bounds = h3ToGeoBoundary(h3);
@@ -43,4 +43,15 @@ export function deltaFromBoundary(boundary) {
     }
   });
   return [maxlat - minlat, maxlng - minlng];
+}
+
+export function mapRegionFromH3(h3) {
+  const [h3lat, h3lng] = h3ToGeo(h3);
+  const [latDelta, lngDelta] = deltaFromH3(h3);
+  return {
+    latitude: h3lat,
+    longitude: h3lng,
+    latitudeDelta: latDelta * 1.5,
+    longitudeDelta: lngDelta * 1.5,
+  };
 }
