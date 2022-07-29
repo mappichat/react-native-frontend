@@ -92,14 +92,16 @@ export default function () {
           }}
         >
           {kRing(currentH3, 10).map(h3 => {
-            if (h3 === h3ToParent(currentH3, resolution)) {
+            if (h3 === currentH3) {
               return <Tile
                 h3={h3}
+                key={h3}
                 fillColor={isDarkMode ? "rgba(128,128,255,0.25)" : "rgba(0,0,128,0.25)"}
               />;
             } else {
               return <Tile
                 h3={h3}
+                key={h3}
                 fillColor={isDarkMode ? "rgba(255,255,255,0.15)" : "rgba(0,0,0,0.15)"}
               />;
             }
