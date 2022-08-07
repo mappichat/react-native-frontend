@@ -134,6 +134,7 @@ android {
     compileSdkVersion rootProject.ext.compileSdkVersion
 
     defaultConfig {
+        manifestPlaceholders = [auth0Domain: "mappichat-staging.us.auth0.com", auth0Scheme: "${applicationId}"]
         applicationId "com.mappichat"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion

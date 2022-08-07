@@ -79,6 +79,8 @@ export default function () {
         <MapView
           ref={mapRef}
           style={StyleSheet.absoluteFill}
+          rotateEnabled={false}
+          pitchEnabled={false}
           onRegionChange={region => setCurrentH3(geoToH3(region.latitude, region.longitude, resolution))}
           onRegionChangeComplete={region => {
             [deltalat, deltalng] = deltaFromH3(currentH3);
