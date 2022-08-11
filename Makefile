@@ -1,5 +1,5 @@
 start:
-	npx react-native start
+	npx react-native start --reset-cache
 
 install:
 	rm -rf package-lock.json && rm -rf yarn.lock && rm -rf node_modules
