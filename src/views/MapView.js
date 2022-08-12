@@ -30,6 +30,8 @@ import { MAX_RESOLUTION, REGION_ENGINE_URL } from '@env';
 enableLatestRenderer();
 
 const colorMap = new Map();
+const reloadDistances = [35, 35, 35, 35, 35, 35];
+const fetchRadii = [56, 56, 56, 56, 56, 56];
 
 export default function ({ startPosition }) {
   const mapRef = useRef(null);
@@ -50,8 +52,8 @@ export default function ({ startPosition }) {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          tiles: kRing(geoToH3(currentPosition.latitude, currentPosition.longitude, MAX_RESOLUTION), 15),
-          levels: [0],
+          tiles: kRing(geoToH3(currentPosition.latitude, currentPosition.longitude, MAX_RESOLUTION), fetchRadii[level]),
+          levels: [level],
         }),
       })
       .then(res => res.json())
@@ -65,7 +67,7 @@ export default function ({ startPosition }) {
   }, [h3Distance(
     geoToH3(currentPosition.latitude, currentPosition.longitude, MAX_RESOLUTION), 
     geoToH3(lastUpdatePosition.latitude, lastUpdatePosition.longitude, MAX_RESOLUTION),
-  ) > 5]);
+  ) > reloadDistances[level], level]);
 
   useEffect(() => {
     let newJsx = [];
@@ -96,25 +98,14 @@ export default function ({ startPosition }) {
       >
         {regionsJsx}
       </MapView>
-      {/* <View style={{ position: 'absolute', bottom: '5%', height: '50%' }}>
+      <View style={{ position: 'absolute', bottom: '5%', height: '50%' }}>
         <StepIndicator
-          currentPosition={parseInt(MAX_RESOLUTION) - resolution}
-          stepCount={parseInt(MAX_RESOLUTION) + 1}
+          currentPosition={level}
+          stepCount={parseInt(MAX_RESOLUTION)}
           direction={'vertical'}
-          onPress={position => {
-            const newResolution = parseInt(MAX_RESOLUTION) - position;
-            let newh3 = currentH3;
-            if (newResolution < resolution) {
-              newh3 = h3ToParent(currentH3, newResolution);
-            } else if (newResolution > resolution) {
-              newh3 = h3ToCenterChild(currentH3, newResolution);
-            }
-            mapRef.current.animateToRegion(mapRegionFromH3(newh3), 2000);
-            setCurrentH3(newh3);
-            setResolution(newResolution);
-          }}
+          onPress={setLevel}
         />
-      </View> */}
+      </View>
     </View>
   );
 };
