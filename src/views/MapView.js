@@ -30,8 +30,8 @@ import { MAX_RESOLUTION, REGION_ENGINE_URL } from '@env';
 enableLatestRenderer();
 
 const colorMap = new Map();
-const reloadDistances = [35, 35, 35, 35, 35, 35];
-const fetchRadii = [56, 56, 56, 56, 56, 56];
+const reloadDistances = [5, 10, 20, 40, 80, 160, 320, 640];
+const fetchRadii = [5, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1];
 
 export default function ({ startPosition }) {
   const mapRef = useRef(null);
@@ -46,24 +46,41 @@ export default function ({ startPosition }) {
 
   useEffect(() => {
     if (!fetching) {
-      console.log(REGION_ENGINE_URL + '/regions')
+      console.log(REGION_ENGINE_URL + '/ring')
       setFetching(true);
-      fetch(REGION_ENGINE_URL + '/regions', {
+      fetch(REGION_ENGINE_URL + '/ring', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          tiles: kRing(geoToH3(currentPosition.latitude, currentPosition.longitude, MAX_RESOLUTION), fetchRadii[level]),
-          levels: [level],
+          tile: geoToH3(currentPosition.latitude, currentPosition.longitude, MAX_RESOLUTION),
+          level: level,
+          radius: fetchRadii[level],
         }),
       })
       .then(res => res.json())
       .then(data => {
-        setRegions(data);
-        setLastUpdatePosition(currentPosition);
+        setRegions({[level]: data});
         setFetching(false);
       })
       .catch(console.error);
+
+      // console.log(REGION_ENGINE_URL + '/country')
+      // setFetching(true);
+      // fetch(REGION_ENGINE_URL + '/country', {
+      //   method: 'POST',
+      //   headers: { 'Content-Type': 'application/json' },
+      //   body: JSON.stringify({
+      //     tile: geoToH3(currentPosition.latitude, currentPosition.longitude, MAX_RESOLUTION),
+      //   }),
+      // })
+      // .then(res => res.json())
+      // .then(data => {
+      //   setRegions({[level]: {country: data}});
+      //   setFetching(false);
+      // })
+      // .catch(console.error);
     }
+    setLastUpdatePosition(currentPosition);
   }, [h3Distance(
     geoToH3(currentPosition.latitude, currentPosition.longitude, MAX_RESOLUTION), 
     geoToH3(lastUpdatePosition.latitude, lastUpdatePosition.longitude, MAX_RESOLUTION),
@@ -101,7 +118,7 @@ export default function ({ startPosition }) {
       <View style={{ position: 'absolute', bottom: '5%', height: '50%' }}>
         <StepIndicator
           currentPosition={level}
-          stepCount={parseInt(MAX_RESOLUTION)}
+          stepCount={reloadDistances.length}
           direction={'vertical'}
           onPress={setLevel}
         />
